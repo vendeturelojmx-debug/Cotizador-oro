@@ -1,28 +1,19 @@
 import streamlit as st
-import cloudscraper
+from curl_cffi import requests as cureq
 from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
 import io
 from datetime import datetime
 
 # ==========================================
-# 1. FUNCIÓN ANTI-BLOQUEOS (CLOUD-SCRAPER)
+# 1. FUNCIÓN ANTI-BLOQUEOS DEFINITIVA
 # ==========================================
 def obtener_precio_compra_oro():
     url = "https://oroyplata.com.mx/"
     
-    # Creamos un "scraper" que imita perfectamente a Google Chrome en Windows
-    scraper = cloudscraper.create_scraper(
-        browser={
-            'browser': 'chrome',
-            'platform': 'windows',
-            'desktop': True
-        }
-    )
-    
     try:
-        # Usamos el scraper en lugar de requests
-        respuesta = scraper.get(url, timeout=15)
+        # Usamos curl_cffi para imitar la huella digital exacta de Chrome al 100%
+        respuesta = cureq.get(url, impersonate="chrome", timeout=15)
         sopa = BeautifulSoup(respuesta.text, 'html.parser')
         
         tablas = sopa.find_all('table')
@@ -113,10 +104,10 @@ def generar_imagen_vende_tu_oro(precio_1g):
 st.set_page_config(page_title="Generador Precios Oro", page_icon="🥇")
 
 st.title("🥇 Cotizador: Vende Tu Oro Mx")
-st.write("Presiona el botón para intentar evadir el bloqueo, leer el precio base de 24k, restar el 5% y generar la imagen.")
+st.write("Presiona el botón para consultar el precio base de 24k, restar el 5% y generar la imagen.")
 
 if st.button("Consultar y Generar Imagen", type="primary"):
-    with st.spinner('Evadiendo seguridad y conectando...'):
+    with st.spinner('Conectando de forma segura...'):
         precio_calculado = obtener_precio_compra_oro()
         
         if precio_calculado:
@@ -127,4 +118,4 @@ if st.button("Consultar y Generar Imagen", type="primary"):
             nombre_archivo = f"VendeTuOroMx_{datetime.now().strftime('%Y%m%d_%H%M')}.png"
             st.download_button(label="📥 Descargar Imagen", data=imagen_bytes, file_name=nombre_archivo, mime="image/png")
         else:
-            st.error("La página rechazó la conexión. Intenta nuevamente en unos minutos.")
+            st.error("No se pudo extraer el precio. La estructura de la página o la conexión fallaron.")
